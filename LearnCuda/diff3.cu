@@ -9,8 +9,8 @@
 #define A 0
 #define B 1
 #define RANDOM 5 // Set to -1 to disable
-#define HSV 1    // 1 to use hsv 0 to use rgv
-#define DT 1
+#define HSV 0    // 1 to use hsv 0 to use rgv
+#define DT 0.5
 using namespace std;
 using namespace sf;
 
@@ -105,16 +105,17 @@ __device__ float DA(int i, int j) {
 }
 
 __device__ float feed(int i, int j) {
-  return 0.055+0.1*(float)(i*i)/(HEIGHT*HEIGHT);
+  // return 0.055+0.1*(float)(i*i)/(HEIGHT*HEIGHT);
   // return 0.055;
-  // return 0.01 + 0.1 * ((float)i / HEIGHT) - 0.01 * ((float)j / HEIGHT);
+  return 0.01 + 0.05 * ((float)i / HEIGHT)/*  - 0.01 * ((float)j / HEIGHT) */;
 }
 
 __device__ float kill(int i, int j) {
-  return 0.062+0.01*(float)(j*j)/(WIDTH*WIDTH);
+  // return 0.062+0.01*(float)(j*j)/(WIDTH*WIDTH);
   // return 0.055;
-  // return 0.062;
-  // return 0.055 + 0.01 * ((float)j / WIDTH) - 0.001 * ((float)i / WIDTH);
+  return 0.057;
+  return 0.062;
+  // return 0.055 + 0.01 * ((float)j / WIDTH)/*  - 0.001 * ((float)i / WIDTH) */;
 }
 
 __global__ void init_map(float *arr) {
@@ -128,7 +129,8 @@ __global__ void init_map(float *arr) {
         arr[i * WIDTH * 2 + j * 2 + A] = 1;
         if (threadIdx.x * blockIdx.x % 256 < RANDOM ||
             threadIdx.x * blockIdx.x % 256 > -RANDOM) {
-          arr[i * WIDTH * 2 + j * 2 + B] = 1;
+          // if (false) {
+          arr[i * WIDTH * 2 + j * 2 + B] = 1;//1
         } else {
           arr[i * WIDTH * 2 + j * 2 + B] = 0;
         }
@@ -219,9 +221,9 @@ __global__ void update(float *cur, float *prev) {
 __global__ void initState(float *prev) {
   for (int i = HEIGHT / 2 - 200; i < HEIGHT / 2 + 200; i++) {
     for (int j = WIDTH / 2 - 200; j < WIDTH / 2 + 200; j++) {
-      if (i == j || i == -j) {
+      // if (i == j || i == -j) {
         prev[i * WIDTH * 2 + j * 2 + B] = 1;
-      }
+      // }
     }
   }
 }
@@ -241,14 +243,15 @@ int main() {
   img.create(WIDTH, HEIGHT);
   // Uint8 *pixels = new Uint8[WIDTH * HEIGHT * 4];
   Uint8 *pixels;
-  cudaMallocManaged(&pixels, WIDTH * HEIGHT * 4);
+  Uint8 *pixLocal = new Uint8[WIDTH * HEIGHT * 4];;
+  cudaMalloc(&pixels, WIDTH * HEIGHT * 4);
   sf::Texture texture;
   texture.create(WIDTH, HEIGHT);
 
   sf::IntRect r(0, 0, WIDTH, HEIGHT);
   sf::Sprite sprite(texture, r);
 
-  int blockSize = 512;
+  int blockSize = 1024;
   int numBlocks = HEIGHT;
   bool paused = true;
   float *cur;
@@ -263,6 +266,7 @@ int main() {
   // Show initial state
   fill_pixels<<<numBlocks, blockSize>>>(pixels, cur);
   cudaDeviceSynchronize();
+  cudaMemcpy(pixLocal, pixels, WIDTH * HEIGHT * 4, cudaMemcpyDeviceToHost);
   // Start the anim. loop
   while (window.isOpen()) {
     float t = clock.restart().asSeconds();
@@ -278,9 +282,10 @@ int main() {
     if (!paused) {
       update<<<numBlocks, blockSize>>>(cur, prev);
       fill_pixels<<<numBlocks, blockSize>>>(pixels, cur);
-      cudaDeviceSynchronize();
+      cudaMemcpy(pixLocal, pixels, WIDTH * HEIGHT * 4, cudaMemcpyDeviceToHost);
+      // cudaDeviceSynchronize();
     }
-    texture.update(pixels);
+    texture.update(pixLocal);
     window.draw(sprite);
 
     // Update the window
@@ -296,5 +301,6 @@ int main() {
   // cudaFreeArr(prev, HEIGHT, WIDTH);
   cudaFree(prev);
   cudaFree(pixels);
+  free(pixLocal);
   return 0;
 }

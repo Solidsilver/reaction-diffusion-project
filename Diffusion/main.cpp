@@ -2,8 +2,8 @@
 #include <iostream>
 #include <cstdlib>
 #include <time.h>
-#define WIDTH 800
-#define HEIGHT 800
+#define WIDTH 1000
+#define HEIGHT 1000
 #define A 0
 #define B 1
 #define RANDOM -1 //Set to -1 to disable
