@@ -3,7 +3,7 @@ CFLAGS = -std=c++11 --compiler-options -Wall --compiler-options -Wextra --compil
 LDFLAGS = -lsfml-graphics -lsfml-window -lsfml-system -lcurand
 # LDFLAGS = -lGL -lGLU -lglut
 
-all: diff3 diff4
+all: diff3 diff4 diff5
 
 %: %.o
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
