@@ -41,9 +41,18 @@ __device__ float DA(int i, int j) {
                             ((WIDTH / 2) * (WIDTH / 2))));
 }
 
-__device__ float feed(int i, int j) { return 0.055; }
+// Interesting value pairs:
+// (Feed, Kill):
+// (0.035, 0.065) - spots @ edges of init. cond.
+// (0.055, 0.065) - long, pushing tendrils
+// (0.055, 0.063) - wobbly/stripy with spot-tipped tendrils
+// (0.045, 0.063) - spots and wobbly stripes
+// (0.050, 0.060) - fast-spreading inverted lines + inverted spots
+// (0.045, 0.060) - fast-spreading lines + holes
 
-__device__ float kill(int i, int j) { return 0.063; } // 0.062 | 0.065
+__device__ float feed(int i, int j) { return 0.035; }
+
+__device__ float kill(int i, int j) { return 0.065; } // 0.062 | 0.065
 
 __device__ int transIdx(int i, int j, int chem) {
   return i * WIDTH * 2 + j * 2 + chem;
