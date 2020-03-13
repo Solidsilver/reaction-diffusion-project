@@ -176,9 +176,9 @@ int main() {
     if (!paused) {
       update<<<numBlocks, blockSize>>>(cur, prev);
       fill_pixels<<<numBlocks, blockSize>>>(pixels, cur);
-      cudaMemcpy(pixLocal, pixels, WIDTH * HEIGHT * 4, cudaMemcpyDeviceToHost);
       cudaDeviceSynchronize();
 
+      cudaMemcpy(pixLocal, pixels, WIDTH * HEIGHT * 4, cudaMemcpyDeviceToHost);
       texture.update(pixLocal);
       window.draw(sprite);
 
