@@ -13,5 +13,5 @@ Also, the reaction part of the equation was abstracted to a function, so they ca
 ## How to run
 
 - Make sure you have the SFML and CUDA libraries installed (latest).
-- Build: 'make all'
-- Run: './diffusion'
+- Build: `make all`
+- Run: `./diffusion`
