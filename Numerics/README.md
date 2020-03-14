@@ -5,6 +5,11 @@ Based on the [Coding Train video](https://www.youtube.com/watch?v=BV9ny785UNc) a
 This version is simplified and rewritten to include CUDA support for the simulation, so larger simulation grids can run faster.
 Also, the reaction part of the equation was abstracted to a function, so they can be swapped out for models other than the [Gray-Scott](https://groups.csail.mit.edu/mac/projects/amorphous/GrayScott/)
 
+## Samples
+
+1000x1000 Realtime (f: 0.055, k:0.062)
+![alt text](./Samples/rdiff_cuda_default.gif "sample1")
+
 ## How to run
 
 - Make sure you have the SFML and CUDA libraries installed (latest).
