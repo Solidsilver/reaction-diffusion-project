@@ -20,9 +20,9 @@ __device__ float diffA(int x, int y) { return 1; }
 
 __device__ float diffB(int x, int y) { return 0.5; }
 
-__device__ float feed(int x, int y) { return 0.0367; }
+__device__ float feed(int x, int y) { return 0.055; }
 
-__device__ float kill(int x, int y) { return 0.0649; }
+__device__ float kill(int x, int y) { return 0.062; }
 
 // Translate indicies of 3d array index to flattened 1d array
 __device__ int trIdx(int i, int j, int k) {
@@ -111,13 +111,10 @@ __global__ void fill_pixels(Uint8 *pixels, float *arr) {
     for (int j = indexX; j < WIDTH; j += strideX) {
       int indexA = trIdx(i, j, A);
       int indexB = trIdx(i, j, B);
-      // int comb = arr[indexA] + arr[indexB];
-      // if (comb < 0) {
-      //   comb *= -1;
-      // }
-      pixels[trIdx2(i, j, 0, WIDTH, 4)] = 0 * 255;
-      pixels[trIdx2(i, j, 1, WIDTH, 4)] = (arr[indexB]) * 255;
-      pixels[trIdx2(i, j, 2, WIDTH, 4)] = (arr[indexA]) * 255;
+      float amt = fdimf(arr[indexA], arr[indexB])*255;
+      pixels[trIdx2(i, j, 0, WIDTH, 4)] = amt;
+      pixels[trIdx2(i, j, 1, WIDTH, 4)] = amt;
+      pixels[trIdx2(i, j, 2, WIDTH, 4)] = amt;
       pixels[trIdx2(i, j, 3, WIDTH, 4)] = 255;
     }
   }
@@ -132,7 +129,7 @@ int main() {
 
   // Create the window
   sf::RenderWindow window(sf::VideoMode(WIDTH, HEIGHT), "Reaction-Diffusion");
-  // window.setFramerateLimit(10);
+  // window.setFramerateLimit(60);
 
   sf::Event event;
 
