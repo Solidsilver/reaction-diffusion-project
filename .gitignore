@@ -9,3 +9,21 @@
 
 # Ignore .o files
 *.o
+
+# VSCode config files
+.vscode/
+
+# Ignore latex build files
+*.gz
+*.fls
+*.log
+*.aux
+*.fdb_latexmk
+*temp.tex
+*.xmpi
+
+# Beamer tex specific build files
+*.nav
+*.out
+*.snm
+*.toc

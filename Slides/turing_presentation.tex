@@ -1,0 +1,981 @@
+\documentclass[t,10pt,fleqn]{beamer}
+
+%%% My preferred theme choices.  More information is available at
+%
+%  https://en.wikipedia.org/wiki/Beamer_(LaTeX)
+%  http://mirrors.ctan.org/macros/latex/contrib/beamer/doc/beameruserguide.pdf
+
+\usetheme{Malmoe}
+\usecolortheme{rose}
+\useinnertheme{rounded}
+\useoutertheme[subsection=false,footline=authorinstitute]{miniframes}
+\usenavigationsymbolstemplate{}
+
+%%% The following command inserts a slide with the outline at the
+%%% beginning of each section, highlighting the current section.  It
+%%% is optional.
+
+\AtBeginSection[]
+{
+  \begin{frame}{Outline}
+    \tableofcontents[currentsection]
+  \end{frame}
+}
+
+\newenvironment{amatrix}[1]{%
+  \left(\begin{array}{@{}*{#1}{r}|r@{}}
+}{%
+  \end{array}\right)
+}
+
+\newenvironment{bulletlist}
+   {
+      \begin{list}
+         {$\bullet$}
+%         {$\cdot$}
+         {
+            \setlength{\itemsep}{.5ex}
+            \setlength{\parsep}{0ex}
+            \setlength{\leftmargin}{1.5 em}
+            \setlength{\rightmargin}{0.5em}
+            \setlength{\parskip}{0ex}
+            \setlength{\topsep}{0ex}
+         }
+   }
+   {
+      \end{list}
+   }
+
+
+\newcount\arrowcount
+\newcommand\arrows[1]{
+        \global\arrowcount#1
+        \ifnum\arrowcount>0
+                \begin{matrix}
+                \expandafter\nextarrow
+        \fi
+}
+
+\newcommand\nextarrow[1]{
+        \global\advance\arrowcount-1
+        \ifx\relax#1\relax\else \xrightarrow{#1}\fi
+        \ifnum\arrowcount=0
+                \end{matrix}
+        \else
+                \\
+                \expandafter\nextarrow
+        \fi
+}
+
+
+%%% It is sometimes easier to have graphics in a subfolder (or
+%%% subfolders) of the current folder, in this case that folder is
+%%% called Figures
+\graphicspath{ 
+  {Figures/}
+}
+
+
+\usepackage{multicol}
+  \usepackage{booktabs}
+  \usepackage{amsmath}
+\usepackage{epsfig}
+\usepackage{enumerate}
+
+\def\ds{\displaystyle}
+\def\u{{\mathbf u}}
+\def\v{{\mathbf v}}
+\def\w{{\mathbf w}}
+
+\def\A{{\mathbf A}}
+
+
+
+\def\B{{\mathbf B}}
+\def\C{{\mathbf C}}
+\def\D{{\mathbf D}}
+\def\E{{\mathbf E}}
+\def\X{{\mathbf X}}
+\def\U{{\mathbf U}}
+
+\def\T{{\mathbf T}}
+
+\def\det{\text{det}}
+\def\row{\text{row}}
+\def\col{\text{col}}
+\def\dim{\text{dim}}
+\def\span{\text{span}}
+\def\rank{\text{rank}}
+\def\dom{\text{dom}}
+\def\domain{\text{domain}}
+\def\range{\text{range}}
+\def\RREF{\text{RREF}}
+\def\null{\text{null}}
+\def\nullity{\text{nullity}}
+\def\ker{\text{ker}}
+
+
+\def\e{{\mathbf e}}
+\def\x{{\mathbf x}}
+\def\y{{\mathbf y}}
+\def\b{{\mathbf b}}
+\def\c{{\mathbf c}}
+
+\def\r{{\mathbf r}}
+
+\def\0{{\mathbf 0}}
+\def\v{{\mathbf v}}
+\def\I{{\mathbf I}}
+
+
+\def\AA{\mathcal{A}}
+\def\R{\mathcal{R}}
+
+\def\S{\mathcal{S}}
+
+\def\V{\mathcal{V}}
+
+\def\M{\mathcal{M}}
+
+\def\({\biggr ( }
+\def\){\biggr ) }
+
+\def\[{\biggr [ }
+\def\]{\biggr ] }
+
+\def\d{\partial}
+
+\newcommand{\tu}[1]{\underline{\textit{#1}}}
+
+% This is the main file
+% This is the main file
+
+\title[Reaction-Diffusion Equations]%
+      {Reaction-Diffusion Equations}
+\subtitle{Turing Mechanisms and Morphogenesis}
+\author[Luke Mattfeld]{Luke Mattfeld}
+\institute[EWU]{Eastern Washington University}
+\date{March 13, 2020}
+
+\begin{document}
+
+\begin{frame}
+\titlepage
+
+\end{frame}
+%-------------------------------------------------------------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------------------------------------------------------------
+\section{Background}
+%------------------------------------------------------------------------------------------------------------------------------
+\begin{frame}{Morphogenesis}
+\vspace{-.3cm}
+\begin{block}{}
+\begin{itemize}
+    \pause
+      \item Class consists of three core topics:
+               \pause
+               \begin{enumerate}
+                    \pause
+                    \item Model Construction
+                       \pause
+                    \item Solving PDEs on unbounded domains
+                     \pause
+                       \item Solving PDEs on bounded domains
+                \end{enumerate}
+          \pause
+     \end{itemize}
+  \end{block}
+   
+   \begin{block}{Grade}
+\begin{itemize}
+    \pause
+      \item Class grade is determined from:
+               \pause
+               \begin{itemize}
+                    \pause
+                    \item 2 exams
+                     \pause
+                     \item Quizzes = 0.5 exam
+                     \pause
+                    \item Written HW = 1.5 exam   \pause 
+                    (one-sided, neat, organized, cover page)
+                     \pause
+                    \item Course Project and Presentation = 1 exam  
+
+                \end{itemize}
+     \end{itemize}
+  \end{block}
+   
+ \end{frame}
+ 
+%-------------------------------------------------------------------------------------------------------------------------------------
+%------------------------------------------------------------------------------------------------------------------------------
+\begin{frame}
+
+   \begin{block}{}
+  \begin{itemize}
+    \pause
+      \item Predominantly, this class involves the construction and  analysis of PDE models
+      \pause
+       \item     Convenient software packages to check your work include:  MATLAB, Octave (similar to MATLAB but free), Julia, SAGE, or  Python (with its associated libraries)
+      \pause
+      \item Software won't help if one has the wrong model.
+      \pause
+     \end{itemize}
+  \end{block}
+   
+ \end{frame}
+
+    
+%-------------------------------------------------------------------------------------------------------------------------------------
+\section{PDE models}
+%-------------------------------------------------------------------------------------------------------------------------------------
+%------------------------------------------------------------------------------------------------------------------------------
+\begin{frame}
+
+\begin{block}{examples}
+\begin{itemize}
+    \pause
+      \item  $u_{tt}(x,t) - c^2 u_{xx}(x,t) =0$, the Wave equation
+          \pause
+             \item  $u_{xx}(x,y) + u_{yy}(x,y) =0$, Laplace's equation
+                  \pause
+             \item  $u_{t}(x,t) = D u_{xx}(x,y)$, the Diffusion equation     
+       \end{itemize}
+  \end{block}
+  
+ \end{frame}
+
+%-------------------------------------------------------------------------------------------------------------------------------------
+%------------------------------------------------------------------------------------------------------------------------------
+%\begin{frame}{Boundary and Initial Conditions}
+\begin{frame}
+
+\begin{block}{Heat Flow}
+\begin{itemize}
+    \pause
+      \item  A laterally insulated metal bar of length $L$ with zero temperature at both ends.  Heat flows in the axial direction with the temperature given by $u(x,t)$.  Suppose that initially the heat distribution is given by $u(x,0) = \phi(x)$.
+          \pause
+      \item The \tu{heat equation} 
+      \begin{center}
+            $u_t = k u_{xx}$.
+      \end{center}
+         \pause
+      \item \tu{Boundary conditions} are given by
+            \begin{center}
+            $u(0,t)= 0$ and $u(L,t)= 0$
+      \end{center}
+               \pause
+      \item \tu{Initial condition} is given by
+            \begin{center}
+            $u(x,0)= \phi(x)$ for $0 \leq x \leq L$.
+      \end{center}
+        \pause
+      \item This model is referred to as an \tu{evolution equation} as it depends on time. 
+      
+       \end{itemize}
+  \end{block}
+  
+ \end{frame}
+%------------------------------------------------------------------------------------------------------------------------------
+%\begin{frame}{Boundary and Initial Conditions}
+\begin{frame}
+
+\begin{block}{Heat Flow - modified}
+\begin{itemize}
+    \pause
+      \item  A laterally insulated metal bar of length $L$ with \tu{insulated} edges at both ends.  Heat flows in the axial direction with the temperature given by $u(x,t)$.  Suppose that initially the heat distribution is given by $u(x,0) = \phi(x)$.
+          \pause
+      \item The \tu{heat equation} 
+      \begin{center}
+            $u_t = k u_{xx}$.
+      \end{center}
+         \pause
+      \item \tu{Boundary conditions} are instead given by
+            \begin{center}
+            $\ds \frac{\d u}{\d x}\biggr |_{(0,t)}= 0$ and $\ds \frac{\d u}{\d x}\biggr |_{(L,t)}= 0$
+      \end{center}
+               \pause
+      \item these are no flux boundary counditions
+       \end{itemize}
+  \end{block}
+  
+ \end{frame}
+%-------------------------------------------------------------------------------------------------------------------------------------
+%\begin{frame}{Boundary and Initial Conditions}
+\begin{frame}
+
+\begin{block}{Laplace's equation}
+\begin{itemize}
+    \pause
+      \item  Consider the steady state temperature $u(x,y)$ on a bounded two dimensional domain $\Omega$.  Along the boundary, $\d \Omega$, there is an imposed temperature distribution given by $f(x,y)$.
+          \pause 
+      \begin{center}
+            $u_{xx}+u_{yy}=0$ where $(x,y) \in \Omega$.
+      \end{center}
+         \pause
+      \item subject to the \tu{boundary conditions} 
+            \begin{center}
+            $u(x,y)= f(x,y)$ on  $(x,y) \in \d \Omega$  
+      \end{center}
+      \pause
+      \item A  constant boundary condition is called a \tu{Dirichlet condition}.
+               \pause
+      \item Such a model is time independent  and called a \tu{steady state} or an \tu{equilibrium model}.        
+      \pause
+       \item In addition, such spatial problems are referred to as a \tu{boundary value problems.}
+      
+       \end{itemize}
+  \end{block}
+  
+ \end{frame}
+
+%-------------------------------------------------------------------------------------------------------------------------------------
+\begin{frame}
+
+\begin{block}{General Form of 2nd-order evolution equation PDE}
+
+\begin{itemize}
+    \pause
+      \item  A 2nd-order evolution PDE in one spatial and one time variable can be written as 
+          \pause 
+      \begin{center}
+            $G(x,t,u,u_x, u_t,u_{xx}, u_{tt}, u_{xt})=0$ on $x \in I$ and $t>0$
+      \end{center}
+  
+         \pause
+      \item order of a PDE is the order of the highest derivative
+            \pause
+      \item a PDE is said to be \tu{linear} if the operator $G$ is linear function of $u$ and its derivatives.
+               \pause
+      \item If $G$ is not linear in $u$ and its derivatives, then PDE is \tu{nonlinear}. 
+      
+       \end{itemize}
+  \end{block}
+  
+  
+  
+ \end{frame}
+
+%-------------------------------------------------------------------------------------------------------------------------------------
+\begin{frame}
+
+\begin{block}{Linear Operators}
+Let $L$ denote an operator that acts on $u \in D$.  Then $L$ is said to be linear provided
+\begin{itemize}
+    \pause
+      \item  $L(u+v) = Lu + Lv$, where $u,v \in D$.
+         \pause
+      \item  given $c$ is a constant, $L(cu) = c Lu$
+         
+\end{itemize}
+  \end{block}
+  
+           \pause
+  
+  \begin{block}{example}
+               Show that $L = \frac{\d}{\d t} - k \frac{\d^2}{\d x^2}$ is a linear operator acting on $u(x,t)$ where $x \in I$ and $t>0$.
+   \end{block}
+   
+
+   
+ \end{frame}
+
+%-------------------------------------------------------------------------------------------------------------------------------------
+\begin{frame}
+
+\begin{block}{Homogeneous vs nonhomogeneoous}
+
+Consider a PDE given by 
+      \begin{center}
+            $G(x,t,u,u_x, u_t,u_{xx}, u_{tt}, u_{xt})=0$ on $x \in I$ and $t>0$
+      \end{center}
+
+\begin{itemize}
+    \pause
+      \item  a PDE is said to be \tu{homogeneous} provided every term contains a $u$ or a derivative of $u$.
+               \pause
+   \item  the PDE is said to be \tu{nonhomogeneous} if there is a term depending only upon the independent variable $x$ and $t$.    
+\end{itemize}
+
+\end{block}
+  
+
+ \end{frame}
+ %-------------------------------------------------------------------------------------------------------------------------------------
+\begin{frame}
+
+\begin{block}{note}
+       A PDE is linear if it is of the form:
+      \begin{center}
+                    $a_0(x,t) u + a_{1,0}(x,t) u_x  + a_{0,1}(x,t) u_t + a_{2,0}(x,t) u_{xx} +a_{0,2}(x,t) u_{tt}+ a_{1,1}(x,t) u_{xt}=g(x,t)$ 
+      \end{center}
+      
+      \begin{itemize}
+        \pause
+          \item  if a PDE is linear and \tu{homogeneous} then $g(x,t)=0$.
+         \pause
+        \item    if a PDE is linear and \tu{nonhomogeneous} then $g(x,t) \neq 0$.
+        \end{itemize}
+        
+ \end{block}         
+     
+           \pause
+
+\begin{block}{classify the following}
+
+  \begin{enumerate}
+      \item  $u_t+u u_{xx}=0$
+ 
+      \item $u_t +3 x u_{xx} = t x^2$
+ 
+      \item $u_t - \sin(x^2t)u_{xt} = 0$        
+      
+       \item $u_{tt} -u_x + \sin(u) = 0$           
+  \end{enumerate}
+\end{block} 
+
+   
+
+ \end{frame}
+ %-------------------------------------------------------------------------------------------------------------------------------------
+ \begin{frame}{Importance of homog linear PDEs}
+
+\begin{block}{Superposition Principle}
+            Given that $\ds \{ u_i \}_{i=1}^n$ are solutions to the linear homog PDE given by $Lu=0$, \pause
+            then the linear combination $\ds u(x,t) = \sum_{i=1}^n c_i u_i(x,t)$ also solves the PDE.
+\end{block}
+  
+           \pause
+  
+\begin{block}{extension}
+           Suppose that $u(x,t, \xi)$ solves the linear homog PDE $Lu=0$ for all $\xi$ on an interval $J$,  then  $\ds u(x,t) = \int_J c(\xi) u(x,t,\xi) d\xi$ solves the PDE.
+\end{block}
+
+  
+   
+ \end{frame}
+
+
+%-------------------------------------------------------------------------------------------------------------------------------------
+\begin{frame}
+
+\begin{block}{example}
+Verify that $u_1(x,t)= x^2 +2t$ is a solution to 
+      \begin{center}
+                    $u_t - u_{xx}= 0$ 
+      \end{center}
+      
+  \end{block}
+  
+           \pause
+  
+\begin{block}{problem}
+Verify that $u_2(x,t)= e^{-t} \sin(x)$ is also a solution to 
+      \begin{center}
+                    $u_t - u_{xx}= 0$ 
+      \end{center}
+      
+  \end{block}
+
+  
+   
+ \end{frame}
+%-------------------------------------------------------------------------------------------------------------------------------------
+\begin{frame}
+
+\begin{block}{example i}
+Solve $u_x= t \sin(x)$.
+ \end{block}
+  
+           \pause
+By direct integration wrt $x$, 
+\begin{eqnarray*}
+      u(x,t) & = & \int t \sin(x) \d x  \\    \pause
+              & = & -t \cos(x) 
+                        + \psi(t),   \pause 
+                         \text{where } \psi(t) \text{ is an arbitrary functions of } t. 
+\end{eqnarray*}                        
+\pause
+
+     \begin{block}{example ii}
+Solve for $u(x,t)$ where $u_{tt} -4u = 0$.
+ \end{block}
+ 
+  \begin{itemize}
+            \pause
+            \item This is a 2nd-order ODE in $t$ with $x$ a free variable.              
+            \pause
+            \item The fundamental set of the ODE is $\{ e^{-2t}, e^{2t} \}$.  
+            \pause
+            \item The general solution to the PDE is then 
+            \pause
+           \begin{center}
+                   $ u(x,t) = \phi(x) e^{-2t}+ \psi(x) e^{2t}$
+            \end{center}
+            where $\phi(x)$ and $\psi(x)$ are arbitrary functions of $x$. 
+   \end{itemize}
+ \end{frame}
+%-------------------------------------------------------------------------------------------------------------------------------------
+ \begin{frame}{Homework}
+    \begin{itemize} 
+             \item  Section 1.1: 1, 2, 3, 5, 7, 11, 12/13 (a, b, e)
+    \end{itemize}
+ 
+ \end{frame}
+%--------------------------------------------------------------------------------------------------------------------
+
+%--------------------------------------------------------------------------------------------------------------------
+\section{Conservation Models}
+%--------------------------------------------------------------------------------------------------------------------
+ \begin{frame}{Conservation Law}
+\begin{center}
+\vspace{-3.2cm}
+\includegraphics[width=0.5\textwidth]{fig_conservation.pdf}
+\end{center}
+ \vspace{-2.5cm}
+ \begin{itemize}
+     \pause
+     \item Consider a tube with cross-sectional area $A$.  The lateral sides are insulated and physical quantities vary only in the $x$ direction and time $t$.  All quantities are constant over a cross section.  
+     \pause
+     \item Let the state variable $u(x,t)$ denote the density of a given quantity (mass, energy, animals, automobiles, $\ldots$)
+          \pause
+     \item The \tu{flux} $\phi(x,t)$ represents the amount of the quantity crossing the section at $x$ position at time $t$ per unit area.
+     \pause
+     \item By convention, flow to the right is positive, to the left is negative.  
+     \pause
+     \item Thus, $A \cdot \phi(x,t)$ represents the total total quantity crossing the section at $x$ position at time $t$.
+     \pause
+     \item  Let $f(x,t)$ denote the rate at which the quantity is created or destroyed.  
+          \pause
+     \item  If $f > 0$, called a source, if $f < 0$, called a sink.
+ \end{itemize}
+ 
+ \end{frame}
+%--------------------------------------------------------------------------------------------------------------------
+ \begin{frame}{}
+\begin{center}
+\vspace{-2.7cm}
+\includegraphics[width=0.6\textwidth]{fig_conservation.pdf}
+\end{center}
+ \vspace{-2.7cm}
+ \begin{block}{Conservation Law}
+  \begin{itemize}
+     \pause
+     \item We wish to construct a mathematical formulation to track the change in the total quantity in the tube between $x=a$ and $x=b$.
+       \pause
+       
+ \end{itemize}
+\begin{center}
+       $ \ds \frac{ d }{ dt}  \(  \int_a^b u(x,t) A dx  \) = \pause
+            A \cdot \phi(a,t) - A \cdot \phi(b,t) \pause
+             + \int_a^b f(x,t) A dx$
+\end{center}
+\pause
+This is the fundamental conservation law.   
+\end{block}
+  
+ \end{frame}
+ %--------------------------------------------------------------------------------------------------------------------
+ \begin{frame}{}
+\begin{center}
+\vspace{-2.4cm}
+\includegraphics[width=0.5\textwidth]{fig_conservation.pdf}
+\end{center}
+ \vspace{-2.4cm}
+
+ 
+ \pause 
+ 
+  \begin{block}{Conservation Law}
+  \begin{itemize}
+     \pause
+     \item Suppose $u$ and $\phi$ have continuous first derivatives then   \pause
+       
+
+ 
+ \vspace{-3ex}
+\begin{eqnarray*}
+      \ds  \frac{ d }{ dt}  \(  \int_a^b u(x,t) A dx  \)  & = &  \int_a^b u_t(x,t) A dx  \\ \pause
+       \text{and } A \cdot \phi(b,t) - A \cdot \phi(a,t)   & = &  A \int_a^b \phi_x(x,t) dx \\ \pause
+        \implies     \int_a^b u_t(x,t) A dx  & = &   \int_a^b \( -\phi_x(x,t) + f(x,t) \) A dx
+\end{eqnarray*}
+\pause
+ \vspace{-1.5ex}
+\item $\implies u_t(x,t) + \phi_x(x,t)= f(x,t),$ also called the \tu{fundamental conservation law.  }
+
+ \end{itemize}
+ 
+\end{block}
+ 
+ 
+ \end{frame}
+%--------------------------------------------------------------------------------------------------------------------
+ \begin{frame}{Method of Characteristics}
+
+ \pause 
+ 
+  \begin{block}{Advection}
+  \begin{itemize}
+     \pause
+     \item If the flux is proportional to the density, $\phi(x,t) = c u(x,t) $, is called an advection model.  
+     \pause
+     \item Paired with the fundamental conservation law, we obtain the  \tu{advection equation} 
+     \begin{center}
+            $ u_t + c u_x = f(x,t)$.
+     \end{center}
+     \pause
+     \item Consider no sources or sinks, that is, $f(x,t) =0$, so that 
+          \begin{center}
+            $ u_t + c u_x =0$.
+     \end{center}
+          \pause
+     \item Observe $u(x,t) = F(x-ct)$ is a solution for any differentiable $F$.
+           \pause
+     \item This is a right-traveling wave.      
+                \pause
+     \item other descriptives for bulk motion is \tu{transport} or \tu{convection}.
+\end{itemize} 
+ 
+ 
+\end{block}
+ 
+ 
+ \end{frame}
+%--------------------------------------------------------------------------------------------------------------------
+ \begin{frame}{}
+
+ \pause 
+ 
+  \begin{block}{example}
+            \begin{center}
+            $ u_t + c u_x =0$ \text{ with initial condition: } $u(x,0) = u_0(x)$
+     \end{center}
+ 
+  \begin{itemize}
+     \pause
+     \item From previous example, it follows that $u(x,t) = u_0(x -ct)$ is the solution.  
+     \pause
+     \item Initial signal moves to the right with speed $c$.  
+     \pause
+     \item Alternatively consider the signal moving along the family of parallel straight lines along $\xi = x - ct$.  
+     \pause
+      \item     These lines are called the \tu{characteristics}.     
+     \pause
+      \item    $u$ is constant along the characteristics.         
+        \end{itemize} 
+ 
+ 
+\end{block}
+ 
+ 
+ \end{frame}
+%--------------------------------------------------------------------------------------------------------------------
+ \begin{frame}{}
+
+ \pause 
+ 
+  \begin{block}{General Advection Equation with Characteristics}
+  
+            \begin{center}
+            $ u_t + c u_x +au = f(x,t)$ 
+           \end{center}
+ \vspace{-3ex}
+ 
+  \begin{itemize}
+
+     \pause
+     \item  The above model has advection, decay, and a reaction term.
+          \pause
+     \item Introduce the \tu{characteristic coordinates}
+            \begin{center}
+            $ \xi = x-ct$ and $\tau = t$ 
+     \end{center}
+     \pause
+     \item  Want to solve in terms of $U(\xi, \tau)$.       
+     \pause
+     \item Using the chainrule 
+
+
+\vspace{-1ex}
+     \begin{minipage}{.4\textwidth} %
+     \begin{eqnarray*} 
+            u_t & =  & \frac{ \d U}{\d \xi}   \frac{ \d \xi}{\d t}  +  \frac{ \d U}{\d \tau}   \frac{ \d \tau}{\d t}   \\ \pause
+                  & =  &U_{\xi}  (-c)  + U_{\tau}  (1)    \\ \pause
+                   & =  &-c U_{\xi}   + U_{\tau}  \pause
+      \end{eqnarray*}
+      \end{minipage} %
+  \begin{minipage}{.4\textwidth} %
+     \begin{eqnarray*} 
+            u_x & =  & \frac{ \d U}{\d \xi}   \frac{ \d \xi}{\d x}  +  \frac{ \d U}{\d \tau}   \frac{ \d \tau}{\d x}   \\ \pause
+                  & =  &U_{\xi} (1)  + U_{\tau}  (0)    \\ \pause
+                   & =  &U_{\xi}  
+      \end{eqnarray*}
+ \end{minipage} %
+ 
+     \pause
+     \item Substituting back into the PDE to obtain, 
+    \begin{eqnarray*} 
+            u_t + c u_x +au & =  &  f(x,t)   \\ \pause
+         ( -c U_{\xi}   + U_{\tau} ) + c U_{\xi}   + a U     & =  & f(\xi+c\tau, \tau)    \\ \pause
+               U_{\tau} + a U  & =  & F(\xi,\tau)   \pause
+      \end{eqnarray*}
+   \item an ODE in $\tau$. 
+
+        \end{itemize} 
+ 
+ 
+\end{block}
+ 
+ 
+ \end{frame}
+%--------------------------------------------------------------------------------------------------------------------
+\begin{frame}
+
+\begin{block}{work along example}
+  Find the general solution to 
+  \begin{center}
+          $u_t+2u_x-u=t.$
+  \end{center}
+\end{block}
+
+\end{frame}
+%--------------------------------------------------------------------------------------------------------------------
+%--------------------------------------------------------------------------------------------------------------------
+\begin{frame}
+
+\begin{block}{general reaction-advection PDE}
+
+\begin{center}
+         $u_t + c(x,t) u_x  =  f(x,t,u) $
+  \end{center}
+  
+\end{block}
+
+\pause
+
+\begin{block}{non-constant advection}
+  Solve $dx/dt = c(t)$.  Let $\xi(x,t) =C$ where $\xi$ is the general solution to the ODE $dx/dt = c(xt)$.  \pause
+
+\begin{itemize}
+\item example i: Determine the general solution to
+   \begin{center}
+          $u_t+2tu_x=0$
+  \end{center}
+
+\item example ii:
+ Determine the solution to 
+  \begin{center}
+          $u_t+2u_x=0.$
+  \end{center}
+  subject to the initial and boundary conditions.  
+  \begin{center}
+          $u(x,0)=e^{-x}$ and $u(0,t)= (1+t^2)^{-1}$
+  \end{center}  
+  
+\end{itemize}
+
+\end{block}
+
+
+\end{frame}
+%--------------------------------------------------------------------------------------------------------------------
+\begin{frame}
+
+\begin{block}{nonlinear advection}
+
+       \begin{itemize}
+       \pause
+       \item Consider the flux to be dependent on $u$,  that is, $\phi(u)$.
+       \pause
+       \item By the chain rule,
+         \begin{center}
+          $\ds \frac{ d \phi(u) }{dx} = \phi'(u) u_x $
+        \end{center}
+       \pause
+       \item Denoting $\phi'(u) = c(u)$, then the associated PDE is
+           \begin{eqnarray*}
+           u_t + c(u) u_x & = & 0 \\
+                             u(x,0) & = & \phi(x)
+        \end{eqnarray*}
+       \pause
+       \item wave speed depends on the density, $u$        
+       \end{itemize}
+\end{block}
+\end{frame}
+%--------------------------------------------------------------------------------------------------------------------
+\begin{frame}
+\pause
+\begin{block}{solution technique}
+
+       \begin{itemize}
+       \pause
+       \item The \tu{characteristic curves} are given by 
+                \begin{center}
+          $\ds \frac{ dx }{dt} = c(u)$
+        \end{center}
+       \pause
+       \item along the characteristic curves $x=x(t)$, $u$ is a constant.  Thus it follows that,
+         \begin{eqnarray*}
+             \ds    \frac{ d^2x }{dt^2}   & = &    \frac{ d c(u )}{dt}          \pause
+                        =  c'(u) \frac{ du}{dt}   =  \pause     
+                        c'(u) \[ u_x  \frac{ dx }{dt}  + u_t  \frac{ dt }{dt}  \]   \\   \pause
+                     &=  &c'(u) \[ u_x  c(u)  + u_t \] = c'(u) \[ 0 \] =0 
+        \end{eqnarray*}
+       \pause
+       \item Thus the characteristic curves occur along straight lines!
+                \begin{center}
+          $\ds \frac{ dx }{dt} = c(u(\xi,0)) $ \pause
+                                      $ =c(\phi(\xi))$ \pause
+                                     $ \implies x(t) = c(\phi(\xi)) t + \xi $
+               \end{center}
+               \pause
+       \item The solution to the IVP is $u(x,t) = \phi(\xi)$ where $\xi$ is defined implicitly above.
+       
+       \end{itemize}
+       
+\end{block}
+
+
+\end{frame}
+%--------------------------------------------------------------------------------------------------------------------
+\begin{frame}
+\pause
+\begin{block}{example}
+Solve the IVP,
+\begin{center}
+$u_t + u u_x =0 \quad u(x,0)=\phi(x) = 2 - x [ H(x) -H(x-1) ] - H(x-1)$.
+\end{center}
+\end{block} 
+\pause
+\begin{block}{solution technique}
+
+       \begin{itemize}
+       \pause
+       \item the front travels more slowly than the back of the wave
+              \pause
+    %   \item for $t<1$, the solution  $u(x,t) = \phi( \xi)$ where
+    %           \begin{center}
+       %                              $x(t) = c(\phi(\xi)) t + \xi $
+     %          \end{center}      
+               
+        \end{itemize}
+       
+\end{block}
+
+
+\end{frame}
+%--------------------------------------------------------------------------------------------------------------------
+\begin{frame}
+\pause
+\begin{block}{Traffic Flow}
+
+Consider traffic moving in a single spatial direction with a car density given by $\rho(x,t)$ (units in cars per km).  This can be modeled by the PDE  
+\begin{center}
+$\rho_t + (\rho v)_x =0 $.
+\end{center}
+where $v(x,t)$ is the local car speed.  Thus $\phi = (\rho v)$ is the flux. \pause
+
+\begin{itemize}
+      \item Reasonable to consider car speed to depend on local traffic.  \pause
+      \item A model could be
+      \begin{center}
+                 $\rho v =  \rho v_M (1 - \frac{\rho}{\rho_J})  $.
+        \end{center}
+        \pause
+        \item $v_M$ is maximum velocity.  \pause
+         \pause
+        \item $\rho_J$ is the density where a traffic jam occurs.  
+                 \pause
+        \item Change of variables for a scaled density:  $ u(x,t) =\ds  \frac{\rho(x,t)}{\rho_J}$.  
+         \pause
+              \item The model then becomes
+      \begin{center}
+                 $u_t+ (1-2u) u_x = 0 $.
+        \end{center}
+\end{itemize}
+
+\end{block}
+
+
+
+
+
+
+\end{frame}
+%--------------------------------------------------------------------------------------------------------------------
+
+%--------------------------------------------------------------------------------------------------------------------
+\section{Diffusion}
+%--------------------------------------------------------------------------------------------------------------------
+\begin{frame}{Diffusion}
+\pause
+\begin{block}{}
+
+\begin{itemize}
+   \pause
+      \item Consider $u(x,t)$ to represent the density of a gas.  
+      \pause
+      \item The particles exhibit random motion with ccllsions.
+       \pause
+\item Fundamental Conservation Law:   $ u_t(x,t) + \phi_x(x,t)= f(x,t)$ 
+\end{itemize}
+
+\end{block}
+
+
+\pause
+\begin{block}{Fick's Law}
+
+\begin{itemize}
+      \pause
+      \item Movement is from higher to lower concentrations. 
+             \pause
+      \item The steeper the concentration gradient, the greater the flux.
+      \pause
+\item Fick's Law:  $\quad  \phi_(x,t)= -D u_x(x,t),$
+\end{itemize}
+
+\end{block}
+
+
+
+
+\end{frame}
+%--------------------------------------------------------------------------------------------------------------------
+\begin{frame}{Diffusion Equation}
+\pause
+\begin{block}{}
+
+\begin{center}
+     $ u_t(x,t) = Du_{xx}(x,t)$ 
+\end{center}
+
+\end{block}
+
+
+\pause
+
+\begin{center}
+\vspace{-3.2cm}
+\includegraphics[width=0.5\textwidth]{fig_conservation.pdf}
+\end{center}
+ \vspace{-2.5cm}
+\pause
+
+
+
+
+\end{frame}
+%--------------------------------------------------------------------------------------------------------------------
+%--------------------------------------------------------------------------------------------------------------------
+\section{Diffusion and Randomness}
+%--------------------------------------------------------------------------------------------------------------------
+%--------------------------------------------------------------------------------------------------------------------
+\section{Vibrations and Acoustics}
+%--------------------------------------------------------------------------------------------------------------------
+
+
+\end{document}
+
+

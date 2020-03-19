@@ -2,16 +2,15 @@
 #include <cstdlib>
 #include <iostream>
 
-#define WIDTH 1000
-#define HEIGHT 1000
+#define WIDTH 500
+#define HEIGHT 500
 #define DEPTH 2
 #define A 0
 #define B 1
-#define dT 1
+#define dT 0.5
 
 using namespace std;
 using namespace sf;
-
 
 __constant__ float weights[3][3] = {
     {0.05, 0.2, 0.05}, {0.2, -1, 0.2}, {0.05, 0.2, 0.05}};
@@ -20,9 +19,9 @@ __device__ float diffA(int x, int y) { return 1; }
 
 __device__ float diffB(int x, int y) { return 0.5; }
 
-__device__ float feed(int x, int y) { return 0.055; }
+__device__ float feed(int x, int y) { return 0.0467; }
 
-__device__ float kill(int x, int y) { return 0.062; }
+__device__ float kill(int x, int y) { return 0.063; }
 
 // Translate indicies of 3d array index to flattened 1d array
 __device__ int trIdx(int i, int j, int k) {
@@ -54,11 +53,37 @@ __device__ float reactB(float valA, float valB, int x, int y) {
 __device__ float initA(int x, int y) { return 1; }
 
 __device__ float initB(int x, int y) {
-  if (y > HEIGHT / 2 - 200 && y < HEIGHT / 2 + 200 && x > WIDTH / 2 - 200 &&
-      x < WIDTH / 2 + 200) {
-    return 1;
+  int y2 = y - (HEIGHT / 2);
+  int x2 = x - (WIDTH / 2);
+  float val = (y2*y2 + x2*x2);
+  // if (y > HEIGHT / 2 - 200 && y < HEIGHT / 2 + 200 && x > WIDTH / 2 - 200 &&
+  //     x < WIDTH / 2 + 200) {
+  if (y == 0 || y == HEIGHT-1 || x == 0 || x == WIDTH-1) {
+    return 0;
+  }
+  // if ( abs(x2) < 50 && abs(y2) < 50) {
+  if (val < HEIGHT*10) {
+    return 1-(val/(HEIGHT*10));
   }
   return 0;
+}
+
+__device__ bool bdryX(int x) { return x > 100; }
+
+__device__ bool bdryY(int y) { return y > 100; }
+
+__device__ bool bdry(int x, int y) {
+  // return true;
+  // int x2 = x-(WIDTH/2);
+  // int y2 = y-(HEIGHT/2);
+  if (x > (HEIGHT*.7)) {
+    if (y > (HEIGHT/2 - 25) && y < (HEIGHT/2 + 20)) {
+      return true;
+    }
+    return false;
+  }
+  return true;
+  // return (x2*x2 + y2*y2) < 100000;
 }
 
 __global__ void init_state(float *arr) {
@@ -84,23 +109,26 @@ __global__ void update(float *cur, float *prev) {
   int strideJ = blockDim.x;
 
   for (int i = tidxI + 1; i < HEIGHT - 1; i += strideI) {
-    for (int j = tidxJ + 1; j < WIDTH - 1; j += strideJ) {
-      float prevA = prev[trIdx(i, j, A)];
-      float prevB = prev[trIdx(i, j, B)];
+    // if (bdryY(i)) {
+      for (int j = tidxJ + 1; j < WIDTH - 1; j += strideJ) {
+        if (bdry(j, i)) {
+          float prevA = prev[trIdx(i, j, A)];
+          float prevB = prev[trIdx(i, j, B)];
 
-      float curA =
-          prevA +
-          (diffA(j, i) * conv(prev, j, i, A) + reactA(prevA, prevB, j, i)) * dT;
-      float curB =
-          prevB +
-          (diffB(j, i) * conv(prev, j, i, B) + reactB(prevA, prevB, j, i)) * dT;
+          float curA = prevA + (diffA(j, i) * conv(prev, j, i, A) +
+                                reactA(prevA, prevB, j, i)) *
+                                   dT;
+          float curB = prevB + (diffB(j, i) * conv(prev, j, i, B) +
+                                reactB(prevA, prevB, j, i)) *
+                                   dT;
 
-      cur[trIdx(i, j, A)] = curA;
-      cur[trIdx(i, j, B)] = curB;
-    }
+          cur[trIdx(i, j, A)] = curA;
+          cur[trIdx(i, j, B)] = curB;
+        }
+      }
+    // }
   }
 }
-
 
 __global__ void fill_pixels(Uint8 *pixels, float *arr) {
   int indexY = blockIdx.x;
@@ -111,7 +139,7 @@ __global__ void fill_pixels(Uint8 *pixels, float *arr) {
     for (int j = indexX; j < WIDTH; j += strideX) {
       int indexA = trIdx(i, j, A);
       int indexB = trIdx(i, j, B);
-      float amt = fdimf(arr[indexA], arr[indexB])*255;
+      float amt = fdimf(arr[indexA], arr[indexB]) * 255;
       pixels[trIdx2(i, j, 0, WIDTH, 4)] = amt;
       pixels[trIdx2(i, j, 1, WIDTH, 4)] = amt;
       pixels[trIdx2(i, j, 2, WIDTH, 4)] = amt;
