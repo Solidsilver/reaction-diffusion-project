@@ -2,8 +2,8 @@
 #include <cstdlib>
 #include <iostream>
 
-#define WIDTH 500
-#define HEIGHT 500
+#define WIDTH 1920
+#define HEIGHT 1080
 #define DEPTH 2
 #define A 0
 #define B 1
@@ -21,7 +21,7 @@ __device__ float diffB(int x, int y) { return 0.5; }
 
 __device__ float feed(int x, int y) { return 0.0467; }
 
-__device__ float kill(int x, int y) { return 0.063; }
+__device__ float kill(int x, int y) { return 0.065; }
 
 // Translate indicies of 3d array index to flattened 1d array
 __device__ int trIdx(int i, int j, int k) {
@@ -53,18 +53,18 @@ __device__ float reactB(float valA, float valB, int x, int y) {
 __device__ float initA(int x, int y) { return 1; }
 
 __device__ float initB(int x, int y) {
-  int y2 = y - (HEIGHT / 2);
-  int x2 = x - (WIDTH / 2);
-  float val = (y2*y2 + x2*x2);
-  // if (y > HEIGHT / 2 - 200 && y < HEIGHT / 2 + 200 && x > WIDTH / 2 - 200 &&
-  //     x < WIDTH / 2 + 200) {
-  if (y == 0 || y == HEIGHT-1 || x == 0 || x == WIDTH-1) {
-    return 0;
+  // int y2 = y - (HEIGHT / 2);
+  // int x2 = x - (WIDTH / 2);
+  // float val = (y2*y2 + x2*x2);
+   if (y > HEIGHT / 2 - 200 && y < HEIGHT / 2 + 100 && x > WIDTH / 2 - 100 &&
+       x < WIDTH / 2 + 100) {
+  //if (y == 0 || y == HEIGHT-1 || x == 0 || x == WIDTH-1) {
+    return 1;
   }
   // if ( abs(x2) < 50 && abs(y2) < 50) {
-  if (val < HEIGHT*10) {
-    return 1-(val/(HEIGHT*10));
-  }
+  //if (val < HEIGHT*10) {
+  //  return 1-(val/(HEIGHT*10));
+  //}
   return 0;
 }
 
@@ -76,12 +76,12 @@ __device__ bool bdry(int x, int y) {
   // return true;
   // int x2 = x-(WIDTH/2);
   // int y2 = y-(HEIGHT/2);
-  if (x > (HEIGHT*.7)) {
-    if (y > (HEIGHT/2 - 25) && y < (HEIGHT/2 + 20)) {
-      return true;
-    }
-    return false;
-  }
+  //if (x > (HEIGHT*.7)) {
+  //  if (y > (HEIGHT/2 - 25) && y < (HEIGHT/2 + 20)) {
+  //    return true;
+  //  }
+  //  return false;
+  //}
   return true;
   // return (x2*x2 + y2*y2) < 100000;
 }
